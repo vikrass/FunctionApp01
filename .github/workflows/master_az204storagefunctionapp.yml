@@ -3,7 +3,7 @@
 
 name: Build and deploy dotnet core app to Azure Function App - az204storagefunctionapp
 
-on: |+
+on:
   push:
     branches:
       - master
