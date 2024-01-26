@@ -17,6 +17,7 @@ using SixLabors.ImageSharp;
 using System.IO;
 using System.Threading.Tasks;
 using SixLabors.ImageSharp.Processing;
+using Azure.Storage.Blobs.Specialized;
 
 namespace FunctionApp01
 {
@@ -66,14 +67,12 @@ namespace FunctionApp01
         [FunctionName("BlobEventTrigger")]
         public static async Task RunAsync(
             [EventGridTrigger] EventGridEvent eventGridEvent,
-            [Blob("{data.url}", FileAccess.Read)] Stream input,
             ILogger log)
         {
             log.LogInformation(eventGridEvent.Data.ToString());
-            log.LogInformation(input.ToString());
             try
             {
-                if (input != null)
+                if (eventGridEvent != null)
                 {
                     var createdEvent = eventGridEvent.Data.ToObjectFromJson<StorageBlobCreatedEventData>();
                     var extension = Path.GetExtension(createdEvent.Url);
@@ -83,12 +82,19 @@ namespace FunctionApp01
                     {
                         var thumbnailWidth = Convert.ToInt32(Environment.GetEnvironmentVariable("THUMBNAIL_WIDTH"));
                         var thumbContainerName = Environment.GetEnvironmentVariable("THUMBNAIL_CONTAINER_NAME");
+                        var imagesContainerName = Environment.GetEnvironmentVariable("IMAGES_CONTAINER_NAME");
+
                         var blobServiceClient = new BlobServiceClient(BLOB_STORAGE_CONNECTION_STRING);
-                        var blobContainerClient = blobServiceClient.GetBlobContainerClient(thumbContainerName);
+
+                        var blobImageContainerClient = blobServiceClient.GetBlobContainerClient(imagesContainerName);
+                        var blobThumbnailContainerClient = blobServiceClient.GetBlobContainerClient(thumbContainerName);
+
+
                         var blobName = GetBlobNameFromUrl(createdEvent.Url);
+                        BlockBlobClient blob = blobImageContainerClient.GetBlockBlobClient(blobName);
 
                         using (var output = new MemoryStream())
-                        using (Image<Rgba32> image = (Image<Rgba32>)Image.Load(input))
+                        using (Image<Rgba32> image = (Image<Rgba32>)Image.Load(await blob.OpenReadAsync(false)))
                         {
                             var divisor = image.Width / thumbnailWidth;
                             var height = Convert.ToInt32(Math.Round((decimal)(image.Height / divisor)));
@@ -96,7 +102,7 @@ namespace FunctionApp01
                             image.Mutate(x => x.Resize(thumbnailWidth, height));
                             image.Save(output, encoder);
                             output.Position = 0;
-                            await blobContainerClient.UploadBlobAsync(blobName, output);
+                            await blobThumbnailContainerClient.UploadBlobAsync(blobName, output);
                         }
                     }
                     else
