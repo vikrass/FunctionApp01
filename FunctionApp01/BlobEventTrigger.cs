@@ -75,6 +75,11 @@ namespace FunctionApp01
                 if (eventGridEvent != null)
                 {
                     var createdEvent = eventGridEvent.Data.ToObjectFromJson<StorageBlobCreatedEventData>();
+
+                    if (createdEvent.Api is not "CreateBlob")
+                    {
+                        return;
+                    }
                     var extension = Path.GetExtension(createdEvent.Url);
                     var encoder = GetEncoder(extension);
 
