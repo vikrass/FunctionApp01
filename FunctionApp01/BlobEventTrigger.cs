@@ -70,7 +70,7 @@ namespace FunctionApp01
             ILogger log)
         {
             log.LogInformation(eventGridEvent.Data.ToString());
-
+            log.LogInformation(input.ToString());
             try
             {
                 if (input != null)
