@@ -93,8 +93,9 @@ namespace FunctionApp01
                         var blobName = GetBlobNameFromUrl(createdEvent.Url);
                         BlockBlobClient blob = blobImageContainerClient.GetBlockBlobClient(blobName);
 
+                        using (var blobStream = await blob.OpenReadAsync(false))
                         using (var output = new MemoryStream())
-                        using (Image<Rgb24> image = (Image<Rgb24>)Image.Load(await blob.OpenReadAsync(false)))
+                        using (Image<Rgb24> image = (Image<Rgb24>)Image.Load(blobStream))
                         {
                             var divisor = image.Width / thumbnailWidth;
                             var height = Convert.ToInt32(Math.Round((decimal)(image.Height / divisor)));
