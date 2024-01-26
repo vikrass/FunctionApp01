@@ -114,6 +114,7 @@ namespace FunctionApp01
             catch (Exception ex)
             {
                 log.LogInformation(ex.Message);
+                log.LogInformation(ex.StackTrace);
                 throw;
             }
         }
