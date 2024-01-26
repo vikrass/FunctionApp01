@@ -23,7 +23,7 @@ namespace FunctionApp01
 {
     public static class BlobEventTrigger
     {
-        private static readonly string BLOB_STORAGE_CONNECTION_STRING = Environment.GetEnvironmentVariable("AzureWebJobsStorage");
+        private static readonly string BLOB_STORAGE_CONNECTION_STRING = Environment.GetEnvironmentVariable("AzureBlobStorage");
 
         private static string GetBlobNameFromUrl(string bloblUrl)
         {
@@ -69,7 +69,7 @@ namespace FunctionApp01
             [EventGridTrigger] EventGridEvent eventGridEvent,
             ILogger log)
         {
-            log.LogInformation(eventGridEvent.Data.ToString());
+            //log.LogInformation(eventGridEvent.Data.ToString());
             try
             {
                 if (eventGridEvent != null)
@@ -94,7 +94,7 @@ namespace FunctionApp01
                         BlockBlobClient blob = blobImageContainerClient.GetBlockBlobClient(blobName);
 
                         using (var output = new MemoryStream())
-                        using (Image<Rgba32> image = (Image<Rgba32>)Image.Load(await blob.OpenReadAsync(false)))
+                        using (Image<Rgb24> image = (Image<Rgb24>)Image.Load(await blob.OpenReadAsync(false)))
                         {
                             var divisor = image.Width / thumbnailWidth;
                             var height = Convert.ToInt32(Math.Round((decimal)(image.Height / divisor)));
@@ -114,7 +114,6 @@ namespace FunctionApp01
             catch (Exception ex)
             {
                 log.LogInformation(ex.Message);
-                log.LogInformation(ex.StackTrace);
                 throw;
             }
         }
