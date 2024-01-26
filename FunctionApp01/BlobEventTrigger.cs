@@ -69,14 +69,14 @@ namespace FunctionApp01
             [EventGridTrigger] EventGridEvent eventGridEvent,
             ILogger log)
         {
-            log.LogInformation(eventGridEvent.Data.ToString());
+            //log.LogInformation(eventGridEvent.Data.ToString());
             try
             {
                 if (eventGridEvent != null)
                 {
                     var createdEvent = eventGridEvent.Data.ToObjectFromJson<StorageBlobCreatedEventData>();
 
-                    if (createdEvent.Api is not "CreateBlob")
+                    if (createdEvent.Api is not "PutBlob")
                     {
                         return;
                     }
