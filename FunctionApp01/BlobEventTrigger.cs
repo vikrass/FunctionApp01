@@ -89,10 +89,10 @@ namespace FunctionApp01
                         var thumbContainerName = Environment.GetEnvironmentVariable("THUMBNAIL_CONTAINER_NAME");
                         var imagesContainerName = Environment.GetEnvironmentVariable("IMAGES_CONTAINER_NAME");
 
-                        var blobServiceClient = new BlobServiceClient(BLOB_STORAGE_CONNECTION_STRING);
+                        BlobServiceClient blobServiceClient = new BlobServiceClient(BLOB_STORAGE_CONNECTION_STRING);
 
-                        var blobImageContainerClient = blobServiceClient.GetBlobContainerClient(imagesContainerName);
-                        var blobThumbnailContainerClient = blobServiceClient.GetBlobContainerClient(thumbContainerName);
+                        BlobContainerClient blobImageContainerClient = blobServiceClient.GetBlobContainerClient(imagesContainerName);
+                        BlobContainerClient blobThumbnailContainerClient = blobServiceClient.GetBlobContainerClient(thumbContainerName);
 
 
                         var blobName = GetBlobNameFromUrl(createdEvent.Url);
